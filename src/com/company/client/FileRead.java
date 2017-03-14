@@ -2,11 +2,14 @@ package com.company.client;
 
 import java.io.*;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by wanghuiwen on 17-3-13.
  */
 public class FileRead {
+
+
     /**
      * 读取数据文件数据
      */
