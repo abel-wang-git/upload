@@ -96,13 +96,21 @@ public class FileRead {
         }
 
         //图片
-        File pic = new File(file.getPath().replace("_0.dat", "_1.jpg"));
-        byte[] picbyte = image2byte(pic);
-        pic.renameTo(new File(Upload.propertie.getMoveTo() + pic.getName()));
-        System.out.println("移动图片"+Upload.propertie.getMoveTo() + pic.getName());
-        pic.delete();
-        System.out.println("删除图片"+pic.getName());
-        return mergeArray(datas, picbyte);
+        File pic = null;
+        try {
+            pic = new File(file.getPath().replace("_0.dat", "_1.jpg"));
+            if(pic!=null){
+                byte[] picbyte = image2byte(pic);
+                pic.renameTo(new File(Upload.propertie.getMoveTo() + pic.getName()));
+                System.out.println("移动图片"+Upload.propertie.getMoveTo() + pic.getName());
+                pic.delete();
+                System.out.println("删除图片"+pic.getName());
+                return mergeArray(datas, picbyte);
+            }
+        } catch (Exception e) {
+            System.out.println("找不到图片"+file.getPath().replace("_0.dat", "_1.jpg"));
+        }
+        return datas;
     }
 
     /**

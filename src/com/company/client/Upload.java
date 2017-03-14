@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
  * Created by wanghuiwen on 17-3-13.
  *
  */
-public class Upload implements Runnable  {
+public class Upload extends Thread implements Runnable  {
     public static Propertie propertie = new Propertie();
 
     @Override
@@ -48,13 +48,14 @@ public class Upload implements Runnable  {
                     UploadRun upload = new UploadRun(file);
                     pool.execute(upload);
                 }
-                System.out.println("第几次执行上传" + count);
+
                 Thread.currentThread().sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            System.out.println("第几次执行上传" + count);
             count++;
         }
     }
