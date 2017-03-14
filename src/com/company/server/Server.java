@@ -1,8 +1,7 @@
 package com.company.server;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -11,17 +10,20 @@ import java.net.Socket;
  */
 public class Server {
     public static void main(String[] args) {
+        int count = 0;
         try {
             ServerSocket serverSocket = new ServerSocket(8808);
             System.out.println("服务启动成功");
             while (true) {
                 Socket socket = serverSocket.accept();
-                InputStreamReader ow = new InputStreamReader(socket.getInputStream(), "GBK");
-                BufferedReader bw = new BufferedReader(ow);
-                String data = null;
-                while ((data = bw.readLine()) != null) {
-                    System.out.println(data);
+                BufferedInputStream ow = new BufferedInputStream(socket.getInputStream());
+
+                int data = 0;
+                byte[] b = new byte[1024];
+                while ((data = ow.read(b, 0, 1024)) != -1) {
                 }
+                System.out.println("第" + count + "次接受数据");
+                count++;
             }
         } catch (IOException e) {
             e.printStackTrace();

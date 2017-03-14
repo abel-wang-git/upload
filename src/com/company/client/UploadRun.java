@@ -1,43 +1,62 @@
 package com.company.client;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
-import java.util.List;
+import java.nio.channels.FileChannel;
+import java.nio.channels.OverlappingFileLockException;
 
 /**
  * Created by wanghuiwen on 17-3-13.
  */
 public class UploadRun implements Runnable {
     private Socket socket;
-    private OutputStreamWriter ow;
-    private BufferedWriter bw;
-    private List<File> files;
+    private BufferedOutputStream ow;
+    private File files;
 
-    public UploadRun(List<File> files) {
+    public UploadRun(File files) {
         this.files = files;
     }
 
     @Override
     public void run() {
+        System.out.println("启动线程");
         try {
-            socket = new Socket("127.0.0.1", 8808);
-            ow = new OutputStreamWriter(socket.getOutputStream(), "GBK");
-            bw = new BufferedWriter(ow);
-            for (File f : files) {
-                String data = FileRead.readFile(f);
-                bw.write(data);
+            RandomAccessFile raf = new RandomAccessFile(files, "rw");
+            FileChannel channel = raf.getChannel();
+            try {
+                if (channel.tryLock() != null) {
+                    String tem ;
+                    StringBuilder data = new StringBuilder();
+                    while ((tem= raf.readLine())!= null) {
+                        data.append(tem);
+                    }
+                    socket = new Socket(Upload.propertie.getIP(),Upload.propertie.getPort());
+                    ow = new BufferedOutputStream(socket.getOutputStream());
+                    ow.write(FileRead.dataFormat(data.toString(), files));
+                    ow.flush();
+                    channel.close();
+                    raf.close();
+                    files.renameTo(new File(Upload.propertie.getMoveTo() + files.getName()));
+                    System.out.println("移动文件"+Upload.propertie.getMoveTo() + files.getName());
+                    files.delete();
+                    System.out.println("删除"+files.getName());
+
+                }
+            } catch (OverlappingFileLockException e) {
+                System.out.println("文件已经锁定");
             }
-            bw.flush();
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                bw.close();
-                ow.close();
-                socket.close();
+                if (ow != null) {
+                    ow.close();
+                }
+                if (socket != null) {
+                    socket.close();
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
