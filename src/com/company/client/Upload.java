@@ -11,11 +11,11 @@ import java.util.concurrent.Executors;
  * Created by wanghuiwen on 17-3-13.
  *
  */
-public class Upload extends Thread implements Runnable  {
+public class Upload {
     public static Propertie propertie = new Propertie();
 
-    @Override
-    public void run() {
+
+    public static void main(String[] arg) {
         Properties p = new Properties();
         InputStream fin = Upload.class.getClassLoader().
                 getResourceAsStream("upload.properties");
@@ -43,20 +43,18 @@ public class Upload extends Thread implements Runnable  {
                 //扫描文件
                 File file = FileRead.scanDir(propertie.getBaseDir());
                 if (file != null) {
-                    //开始上传
                     System.out.println("开始上传文件" + file.getName());
-                    UploadRun upload = new UploadRun(file);
+                    byte[] content = FileRead.readFile(file);
+                    //开始上传
+
+                    UploadRun upload = new UploadRun(file,content);
                     pool.execute(upload);
                 }
-
-                Thread.currentThread().sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            }catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("第几次执行上传" + count);
             count++;
+            System.out.print(count);
         }
     }
 }
