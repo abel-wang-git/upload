@@ -2,7 +2,8 @@ package com.company.client;
 
 import javax.imageio.stream.FileImageInputStream;
 import java.io.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Created by wanghuiwen on 17-3-13.
@@ -15,13 +16,13 @@ public class FileRead {
     public static File scanDir(String baseDir) {
         File file = new File(baseDir);
         if (file.isDirectory()) {
-            File[] fileArr=orderByDate( file.listFiles());
+            File[] fileArr = orderByDate(file.listFiles());
             for (File f : fileArr) {
                 if (f.isDirectory()) {
                     scanDir(f.getPath());
                 } else {
                     if (f.getName().endsWith(".dat")) {
-                        if(!f.renameTo(f)){
+                        if (!f.renameTo(f)) {
                             System.out.println("文件占用跳过");
                             continue;
                         }
@@ -32,9 +33,10 @@ public class FileRead {
         }
         return null;
     }
+
     //时间排序
-    public static File[] orderByDate(File[] fs) {
-        Arrays.sort(fs,new Comparator< File>(){
+    private static File[] orderByDate(File[] fs) {
+        Arrays.sort(fs, new Comparator<File>() {
             public int compare(File f1, File f2) {
                 long diff = f1.lastModified() - f2.lastModified();
                 if (diff < 0)
@@ -44,6 +46,7 @@ public class FileRead {
                 else
                     return -1;
             }
+
             public boolean equals(Object obj) {
                 return true;
             }
@@ -53,28 +56,28 @@ public class FileRead {
 
     public static byte[] readFile(File file) {
         byte[] result = null;
-        FileInputStream fi =null;
+        FileInputStream fi = null;
         try {
-                fi=new FileInputStream(file);
-                ByteArrayOutputStream bos = new ByteArrayOutputStream((int) file.length());
-                byte[] tem = new byte[1024];
-                while (fi.read(tem, 0, 1024) != -1) {
-                    bos.write(tem);
-                }
-                result=dataFormat(bos.toByteArray(),file);
-                bos.flush();
-                bos.close();
-                fi.close();
-                file.renameTo(new File(Upload.propertie.getMoveTo()+"/" + file.getName()));
-                System.out.println("移动文件" + Upload.propertie.getMoveTo() +"/"+ file.getName());
-                file.delete();
-                System.out.println("删除" + file.getName());
-        }catch (FileNotFoundException e1){
+            fi = new FileInputStream(file);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream((int) file.length());
+            byte[] tem = new byte[1024];
+            while (fi.read(tem, 0, 1024) != -1) {
+                bos.write(tem);
+            }
+            result = dataFormat(bos.toByteArray(), file);
+            bos.flush();
+            bos.close();
+            fi.close();
+            file.renameTo(new File(Upload.propertie.getMoveTo() + "/" + file.getName()));
+            System.out.println("移动文件" + Upload.propertie.getMoveTo() + "/" + file.getName());
+            file.delete();
+            System.out.println("删除" + file.getName());
+        } catch (FileNotFoundException e1) {
             e1.printStackTrace();
             System.out.println("文件打开出错");
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 fi.close();
             } catch (IOException e) {
@@ -104,13 +107,13 @@ public class FileRead {
                 datas[8 + i] = id[i];
             }
             //车牌 36开始
-            String chePai ;
+            String chePai;
             if (data[60] != 78 && data[61] != 65) {
-                chePai= byteToString(data, 60, 8);
+                chePai = byteToString(data, 60, 8);
             } else {
-                chePai="-";
+                chePai = "-";
             }
-            for (int i = 0; i<chePai.getBytes("GBK").length; i++) {
+            for (int i = 0; i < chePai.getBytes("GBK").length; i++) {
                 datas[40 + i] = chePai.getBytes("GBK")[i];
             }
             //过车时间52开始
@@ -130,12 +133,11 @@ public class FileRead {
             //号牌种类
             int type = (byteToInt2(data, 108));
             String typeStr;
-            if (type < 10&&type>0) {
+            if (type < 10 && type > 0) {
                 typeStr = "0" + type;
-            }else if(type<=0){
-                typeStr="01";
-            }
-            else {
+            } else if (type <= 0) {
+                typeStr = "01";
+            } else {
                 typeStr = Integer.toString(type);
             }
             for (int i = 0; i < 2; i++) {
@@ -162,12 +164,13 @@ public class FileRead {
         }
         return result;
     }
+
     //图片处理
     private static byte[] getBytes(byte[] data, File file, byte[] result, byte[] datas) {
         File pic;
         pic = new File(file.getPath().replace("_0.dat", "_1.jpg"));
-        if (pic!= null && pic.renameTo(pic)) {
-            System.out.println("图片处理"+pic.getName());
+        if (pic != null && pic.renameTo(pic)) {
+            System.out.println("图片处理" + pic.getName());
             byte[] picByte = image2byte(pic);
             int length = picByte.length + datas.length;
             for (int i = 0; i < intToBytes2(length).length; i++) {
@@ -176,7 +179,7 @@ public class FileRead {
             result = mergeArray(datas, picByte);
         } else {
             System.out.println("图片出错");
-            result =null;
+            result = null;
         }
         return result;
     }
@@ -203,7 +206,7 @@ public class FileRead {
         try {
             input = new FileImageInputStream(file);
             ByteArrayOutputStream output = new ByteArrayOutputStream();
-            byte[] buf = new byte[(int)file.length()];
+            byte[] buf = new byte[(int) file.length()];
             int numBytesRead = 0;
             while ((numBytesRead = input.read(buf)) != -1) {
                 output.write(buf, 0, numBytesRead);
