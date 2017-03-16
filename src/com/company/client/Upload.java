@@ -1,8 +1,6 @@
 package com.company.client;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,8 +18,14 @@ public class Upload extends Thread {
             InputStream fin = Upload.class.getClassLoader().
                     getResourceAsStream("upload.properties");
             //初始化配置
+            InputStreamReader br =null;
             try {
-                p.load(fin);
+                br =new InputStreamReader(fin,"GBK");
+            } catch (UnsupportedEncodingException e) {
+                System.out.print("编码出错");
+            }
+            try {
+                p.load(br);
                 propertie.setBaseDir(p.getProperty("baseDir"));
                 propertie.setSuffix(p.getProperty("suffix"));
                 propertie.setBayonetId(p.getProperty("bayonetId"));
