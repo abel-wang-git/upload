@@ -30,6 +30,7 @@ public class UploadRun implements Runnable {
             ow.flush();
             System.out.println("启动线程 结束上传--------------------------");
         } catch (ConnectException exception) {
+            System.out.print("链接异常上传失败");
         } catch (IOException e) {
         } finally {
             try {

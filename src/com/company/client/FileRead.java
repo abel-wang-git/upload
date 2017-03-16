@@ -21,7 +21,7 @@ public class FileRead {
                 } else {
                     if (f.getName().endsWith(".dat")) {
                         if(!f.renameTo(f)){
-                            System.out.print("文件占用跳过");
+                            System.out.println("文件占用跳过");
                             continue;
                         }
                         return f;
@@ -47,13 +47,10 @@ public class FileRead {
                 bos.flush();
                 bos.close();
                 fi.close();
-                file.renameTo(new File(Upload.propertie.getMoveTo() + file.getName()));
-                System.out.println("移动文件" + Upload.propertie.getMoveTo() + file.getName());
-                if(file.delete()){
-                    System.out.println("删除" + file.getName());
-                }else{
-                    System.out.println("删除失败");
-                }
+                file.renameTo(new File(Upload.propertie.getMoveTo()+"/" + file.getName()));
+                System.out.println("移动文件" + Upload.propertie.getMoveTo() +"/"+ file.getName());
+                file.delete();
+                System.out.println("删除" + file.getName());
         }catch (FileNotFoundException e1){
             e1.printStackTrace();
             System.out.println("文件打开出错");
@@ -102,7 +99,7 @@ public class FileRead {
             String date = file.getName().split("_")[0];
             StringBuilder sb = dateFamart(date);
             for (int i = 0; i < sb.toString().getBytes("GBK").length; i++) {
-                datas[52 + i] = sb.toString().getBytes("GBK")[i];
+                datas[53 + i] = sb.toString().getBytes("GBK")[i];
             }
             //方向
             int num = (byteToInt2(data, 224));
@@ -115,9 +112,12 @@ public class FileRead {
             //号牌种类
             int type = (byteToInt2(data, 108));
             String typeStr;
-            if (type < 10) {
+            if (type < 10&&type>0) {
                 typeStr = "0" + type;
-            } else {
+            }else if(type<=0){
+                typeStr="01";
+            }
+            else {
                 typeStr = Integer.toString(type);
             }
             for (int i = 0; i < 2; i++) {
@@ -130,11 +130,11 @@ public class FileRead {
             int xiansu = (byteToInt2(data, 136));
 
             int xiansu1 = (byteToInt2(data, 140));
-            datas[77] = (byte) xiansu;
+            datas[78] = (byte) xiansu;
 
             //车速
             int speed = (byteToInt2(data, 20));
-            datas[76] = (byte) speed;
+            datas[77] = (byte) speed;
 
             //处理图片
             result = getBytes(data, file, result, datas);
@@ -148,20 +148,17 @@ public class FileRead {
     private static byte[] getBytes(byte[] data, File file, byte[] result, byte[] datas) {
         File pic;
         pic = new File(file.getPath().replace("_0.dat", "_1.jpg"));
-        if (pic != null && pic.renameTo(pic)) {
-            System.out.println("图片处理");
+        if (pic!= null && pic.renameTo(pic)) {
+            System.out.println("图片处理"+pic.getName());
             byte[] picByte = image2byte(pic);
-            int length = picByte.length + data.length;
+            int length = picByte.length + datas.length;
             for (int i = 0; i < intToBytes2(length).length; i++) {
                 datas[4 + i] = intToBytes2(length)[i];
             }
             result = mergeArray(datas, picByte);
         } else {
             System.out.println("图片出错");
-            for (int i = 0; i < intToBytes2(100).length; i++) {
-                datas[i + 4] = intToBytes2(100)[i];
-            }
-            result =datas;
+            result =null;
         }
         return result;
     }
@@ -188,7 +185,7 @@ public class FileRead {
         try {
             input = new FileImageInputStream(file);
             ByteArrayOutputStream output = new ByteArrayOutputStream();
-            byte[] buf = new byte[1024];
+            byte[] buf = new byte[(int)file.length()];
             int numBytesRead = 0;
             while ((numBytesRead = input.read(buf)) != -1) {
                 output.write(buf, 0, numBytesRead);
@@ -207,8 +204,6 @@ public class FileRead {
     /***
      * 合并字节数组
      *
-     * @param a
-     * @return
      */
     public static byte[] mergeArray(byte[]... a) {
         // 合并完之后数组的总长度
