@@ -13,25 +13,26 @@ import java.net.Socket;
 public class UploadRun implements Runnable {
     private Socket socket;
     private BufferedOutputStream ow;
-    private File files;
+    private int files;
     private byte[] content;
 
-    public UploadRun(File files, byte[] content) {
+    public UploadRun(int files, byte[] content) {
         this.files = files;
         this.content = content;
     }
     @Override
     public void run() {
-        System.out.println("启动线程 开始上传--------------------------");
+        System.out.println("启动线程"+files+" 开始上传--------------------------");
         try {
             socket = new Socket(Upload.propertie.getIP(), Upload.propertie.getPort());
             ow = new BufferedOutputStream(socket.getOutputStream());
-            upload();
-            System.out.println("启动线程 结束上传--------------------------");
+            ow.write(content);
+            ow.flush();
+            System.out.println("启动线程"+files+"结束上传--------------------------");
         } catch (ConnectException exception) {
-            upload();
+            run();
         } catch (IOException e) {
-            upload();
+            run();
         } finally {
             try {
                 if(ow!=null){
@@ -43,15 +44,6 @@ public class UploadRun implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private void upload() {
-        try {
-            ow.write(content);
-            ow.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

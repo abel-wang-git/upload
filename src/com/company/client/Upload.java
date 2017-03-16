@@ -34,10 +34,12 @@ public class Upload extends Thread {
                 propertie.setMoveTo(p.getProperty("moveTo"));
                 propertie.setIP(p.getProperty("IP"));
                 propertie.setPort(Integer.parseInt(p.getProperty("port")));
+                br.close();
                 fin.close();
             } catch (IOException e) {
                 System.out.println("配置文件读取出错");
             }
+            int count=0;
             //线程池
             ExecutorService pool = Executors.newFixedThreadPool(3);
             while (true) {
@@ -47,10 +49,12 @@ public class Upload extends Thread {
                     System.out.println("------开始上传文件" + file.getName());
                     byte[] content = FileRead.readFile(file);
                     if(content!=null){
-                        UploadRun upload = new UploadRun(file, content);
+                        UploadRun upload = new UploadRun(count, content);
                         pool.execute(upload);
+                        count++;
                     }
                 }
+
             }
         }
     }
