@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/upload_jar</output-path>
     <root id="archive" name="upload.jar">
       <element id="module-output" name="upload" />
+      <element id="library" level="project" name="log4j-1.2.17" />
     </root>
   </artifact>
 </component>

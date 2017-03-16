@@ -1,5 +1,7 @@
 package com.company.client;
 
+import org.apache.log4j.Logger;
+
 import java.io.*;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -10,19 +12,21 @@ import java.util.concurrent.Executors;
  *
  */
 public class Upload extends Thread {
+    private static Logger logger = Logger.getLogger(Upload.class);
     public static Propertie propertie = new Propertie();
     @Override
     public void run() {
         {
+            logger.error("¿ªÊ¼¶ÁÈ¡ÅäÖÃÎÄ¼ş");
             Properties p = new Properties();
             InputStream fin = Upload.class.getClassLoader().
                     getResourceAsStream("upload.properties");
-            //åˆå§‹åŒ–é…ç½®
+            //³õÊ¼»¯ÅäÖÃ
             InputStreamReader br =null;
             try {
                 br =new InputStreamReader(fin,"GBK");
             } catch (UnsupportedEncodingException e) {
-                System.out.print("ç¼–ç å‡ºé”™");
+                logger.error("¶ÁÈ¡ÅäÖÃÎÄ¼ş±àÂë³ö´í");
             }
             try {
                 p.load(br);
@@ -34,24 +38,24 @@ public class Upload extends Thread {
                 propertie.setMoveTo(p.getProperty("moveTo"));
                 propertie.setIP(p.getProperty("IP"));
                 propertie.setPort(Integer.parseInt(p.getProperty("port")));
-                File file = new File(propertie.getBaseDir() + "/");
+                File file = new File(propertie.getMoveTo() + "/");
                 if (!file.exists() && !file.isDirectory()) {
-                    System.out.println("//ä¸å­˜åœ¨");
                     file.mkdir();
                 }
                 br.close();
                 fin.close();
             } catch (IOException e) {
-                System.out.println("é…ç½®æ–‡ä»¶è¯»å–å‡ºé”™");
+                logger.error("ÅäÖÃÎÄ¼ş¶ÁÈ¡³ö´í"+e.getMessage());
             }
             int count=0;
-            //çº¿ç¨‹æ± 
+            logger.error("ÅäÖÃÎÄ¼ş¶ÁÈ¡³É¹¦ ¿ªÊ¼É¨ÃèÎÄ¼ş");
+            //Ïß³Ì³Ø
             ExecutorService pool = Executors.newFixedThreadPool(3);
             while (true) {
-                //æ‰«ææ–‡ä»¶
+                //É¨ÃèÎÄ¼ş
                 File file = FileRead.scanDir(propertie.getBaseDir());
                 if (file != null) {
-                    System.out.println("------å¼€å§‹ä¸Šä¼ æ–‡ä»¶" + file.getName());
+                    logger.error("------¿ªÊ¼ÉÏ´«ÎÄ¼ş" + file.getName());
                     byte[] content = FileRead.readFile(file);
                     if(content!=null){
                         UploadRun upload = new UploadRun(count, content);

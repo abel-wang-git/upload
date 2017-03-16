@@ -1,5 +1,7 @@
 package com.company.client;
 
+import org.apache.log4j.Logger;
+
 import javax.imageio.stream.FileImageInputStream;
 import java.io.*;
 import java.util.Arrays;
@@ -9,7 +11,7 @@ import java.util.Comparator;
  * Created by wanghuiwen on 17-3-13.
  */
 public class FileRead {
-
+    private static Logger logger = Logger.getLogger(FileRead.class);
     /**
      * 扫描目录
      */
@@ -23,7 +25,7 @@ public class FileRead {
                 } else {
                     if (f.getName().endsWith(".dat")) {
                         if (!f.renameTo(f)) {
-                            System.out.println("文件占用跳过");
+                            logger.error("文件占用跳过"+f.getName());
                             continue;
                         }
                         return f;
@@ -69,19 +71,18 @@ public class FileRead {
             bos.close();
             fi.close();
             file.renameTo(new File(Upload.propertie.getMoveTo() + "/" + file.getName()));
-            System.out.println("移动文件" + Upload.propertie.getMoveTo() + "/" + file.getName());
+            logger.info("移动文件" + Upload.propertie.getMoveTo() + "/" + file.getName());
             file.delete();
-            System.out.println("删除" + file.getName());
+            logger.info("删除" + file.getName());
         } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-            System.out.println("文件打开出错");
+            logger.error("文件打开出错" +e1.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage()+e.getStackTrace());
         } finally {
             try {
                 fi.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage()+e.getStackTrace());
             }
         }
         return result;
@@ -160,7 +161,7 @@ public class FileRead {
             result = getBytes(data, file, result, datas);
 
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage()+e.getStackTrace());
         }
         return result;
     }
@@ -178,7 +179,7 @@ public class FileRead {
             }
             result = mergeArray(datas, picByte);
         } else {
-            System.out.println("图片出错");
+            logger.error("图片出错"+pic.getPath());
             result = null;
         }
         return result;
@@ -215,9 +216,9 @@ public class FileRead {
             output.close();
             input.close();
         } catch (FileNotFoundException ex1) {
-            ex1.printStackTrace();
+            logger.error(ex1.getMessage()+ex1.getStackTrace());
         } catch (IOException ex1) {
-            ex1.printStackTrace();
+            logger.error(ex1.getMessage()+ex1.getStackTrace());
         }
         return data;
     }
@@ -266,7 +267,7 @@ public class FileRead {
         try {
             s = new String(tem, "GBK");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage()+e.getStackTrace());
         }
         return s;
     }
