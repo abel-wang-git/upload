@@ -17,7 +17,7 @@ public class Guard extends Thread {
     public void run() {
         while(!runnable.isAlive()){
             System.out.println(runnable.isAlive());
-         runnable.start();
+            runnable.run();
         }
     }
 }

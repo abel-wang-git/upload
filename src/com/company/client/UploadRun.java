@@ -3,8 +3,8 @@ package com.company.client;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.Socket;
-import java.nio.channels.OverlappingFileLockException;
 
 /**
  * Created by wanghuiwen on 17-3-13.
@@ -29,12 +29,16 @@ public class UploadRun implements Runnable {
             ow.write(content);
             ow.flush();
             System.out.println("启动线程 结束上传--------------------------");
+        } catch (ConnectException exception) {
         } catch (IOException e) {
-            e.printStackTrace();
         } finally {
             try {
-                ow.close();
-                socket.close();
+                if(ow!=null){
+                    ow.close();
+                }
+                if( socket!=null){
+                    socket.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

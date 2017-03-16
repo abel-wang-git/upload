@@ -2,9 +2,6 @@ package com.company.client;
 
 import javax.imageio.stream.FileImageInputStream;
 import java.io.*;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
 
 /**
  * Created by wanghuiwen on 17-3-13.
@@ -14,7 +11,7 @@ public class FileRead {
     /**
      * 扫描目录
      */
-    public static File scanDir(String baseDir) throws IOException {
+    public static File scanDir(String baseDir) {
         File file = new File(baseDir);
         if (file.isDirectory()) {
             File[] fileArr = file.listFiles();
@@ -23,6 +20,10 @@ public class FileRead {
                     scanDir(f.getPath());
                 } else {
                     if (f.getName().endsWith(".dat")) {
+                        if(!f.renameTo(f)){
+                            System.out.print("文件占用跳过");
+                            continue;
+                        }
                         return f;
                     }
                 }
@@ -30,6 +31,7 @@ public class FileRead {
         }
         return null;
     }
+
 
     public static byte[] readFile(File file) {
         byte[] result = null;
@@ -54,6 +56,7 @@ public class FileRead {
                 }
         }catch (FileNotFoundException e1){
             e1.printStackTrace();
+            System.out.println("文件打开出错");
         }catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -70,79 +73,109 @@ public class FileRead {
      * 处理数据
      */
     public static byte[] dataFormat(byte[] data, File file) {
-        byte[] datas = new byte[100];
-            //卡口编号
-        byte[] id = Upload.propertie.getBayonetId().getBytes();
-        for (int i = 0; i < id.length; i++) {
-            datas[4 + i] = id[i];
-            }
-        //方向
-        int num = (byteToInt2(data, 196));
-        datas[34] = (byte) num;
-
-        //车道号
-        int num2 = (byteToInt2(data, 16));
-        datas[35] = (byte) num2;
-        String chepai = byteToString(data, 60, 8);
-        String weishibie = "-";
-        //车牌 36开始
-        if (data[60] != 78 && data[61] != 65) {
-            for (int i = 0; i < 8; i++) {
-                datas[36 + i] = data[60 + i];
-            }
-        } else {
-            for (int i = 0; i < weishibie.getBytes().length; i++) {
-                datas[36 + i] = weishibie.getBytes()[i];
-            }
-        }
-
-
-        //号牌种类
-        int type = (byteToInt2(data, 108));
-        String typestr = "";
-        if (type < 10) {
-            typestr = "0" + type;
-        } else {
-            typestr = Integer.toString(type);
-        }
-        for (int i = 0; i < 2; i++) {
-            datas[46 + i] = typestr.getBytes()[i];
-        }
-        //限速
-        int tpe = byteToInt2(data, 124);
-        int xiansu = (byteToInt2(data, 136));
-        int xiansu1 = (byteToInt2(data, 140));
-        datas[73] = (byte) xiansu;
-        //过车时间48开始
-        String date = file.getName().split("_")[0];
-        StringBuilder sb = new StringBuilder();
-        sb.append(date.substring(0, 3)).append("-").append(date.substring(3, 5)).append("-").append(date.substring(5, 7)
-        ).append(" ").append(date.substring(7, 9)).append(":").append(date.substring(9, 11)).append(":")
-                .append(date.substring(11, 13)).append(".").append(date.substring(13, 16));
-        for (int i = 0; i < sb.toString().getBytes().length; i++) {
-            datas[48 + i] = sb.toString().getBytes()[i];
-            }
-
-        //车速
-        int speed = (byteToInt2(data, 24));
-        datas[72] = (byte) speed;
-
         //图片
         File pic = null;
+        byte[] result = null;
         try {
-            pic = new File(file.getPath().replace("_0.dat", "_1.jpg"));
-            if(pic!=null){
-                byte[] picbyte = image2byte(pic);
-                pic.renameTo(new File(Upload.propertie.getMoveTo() + pic.getName()));
-                System.out.println("移动图片"+Upload.propertie.getMoveTo() + pic.getName());
-                pic.delete();
-                System.out.println("删除图片"+pic.getName());
-                return mergeArray(datas, picbyte);
+            byte[] datas = new byte[100];
+            //0-4
+            String kkbs = "kkbs";
+            for (int i = 0; i < kkbs.getBytes("GBK").length; i++) {
+                datas[i] = kkbs.getBytes("GBK")[i];
             }
-        } catch (Exception e) {
-            System.out.println("找不到图片"+file.getPath().replace("_0.dat", "_1.jpg"));
+            //卡口编号4-8
+            byte[] id = Upload.propertie.getBayonetId().getBytes("GBK");
+            for (int i = 0; i < id.length; i++) {
+                datas[8 + i] = id[i];
+            }
+            //车牌 36开始
+            String chePai ;
+            if (data[60] != 78 && data[61] != 65) {
+                chePai= byteToString(data, 60, 8);
+            } else {
+                chePai="-";
+            }
+            for (int i = 0; i<chePai.getBytes("GBK").length; i++) {
+                datas[40 + i] = chePai.getBytes("GBK")[i];
+            }
+            //过车时间52开始
+            String date = file.getName().split("_")[0];
+            StringBuilder sb = dateFamart(date);
+            for (int i = 0; i < sb.toString().getBytes("GBK").length; i++) {
+                datas[52 + i] = sb.toString().getBytes("GBK")[i];
+            }
+            //方向
+            int num = (byteToInt2(data, 224));
+            datas[38] = (byte) num;
+
+            //车道号
+            int num2 = (byteToInt2(data, 16));
+            datas[39] = (byte) num2;
+
+            //号牌种类
+            int type = (byteToInt2(data, 108));
+            String typeStr;
+            if (type < 10) {
+                typeStr = "0" + type;
+            } else {
+                typeStr = Integer.toString(type);
+            }
+            for (int i = 0; i < 2; i++) {
+                datas[50 + i] = typeStr.getBytes("GBK")[i];
+            }
+
+            //限速
+            int tpe = byteToInt2(data, 124);
+
+            int xiansu = (byteToInt2(data, 136));
+
+            int xiansu1 = (byteToInt2(data, 140));
+            datas[77] = (byte) xiansu;
+
+            //车速
+            int speed = (byteToInt2(data, 20));
+            datas[76] = (byte) speed;
+
+            //处理图片
+            result = getBytes(data, file, result, datas);
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
-        return datas;
+        return result;
+    }
+    //图片处理
+    private static byte[] getBytes(byte[] data, File file, byte[] result, byte[] datas) {
+        File pic;
+        pic = new File(file.getPath().replace("_0.dat", "_1.jpg"));
+        if (pic != null && pic.renameTo(pic)) {
+            System.out.println("图片处理");
+            byte[] picByte = image2byte(pic);
+            int length = picByte.length + data.length;
+            for (int i = 0; i < intToBytes2(length).length; i++) {
+                datas[4 + i] = intToBytes2(length)[i];
+            }
+            result = mergeArray(datas, picByte);
+        } else {
+            System.out.println("图片出错");
+            for (int i = 0; i < intToBytes2(100).length; i++) {
+                datas[i + 4] = intToBytes2(100)[i];
+            }
+            result =datas;
+        }
+        return result;
+    }
+
+    private static StringBuilder dateFamart(String date) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(date.substring(0, 4)).append("-")
+                .append(date.substring(4, 6)).append("-")
+                .append(date.substring(6, 8)).append(" ")
+                .append(date.substring(8, 10)).append(":")
+                .append(date.substring(10, 12)).append(":")
+                .append(date.substring(12, 14)).append(".")
+                .append(date.substring(14, 17));
+        return sb;
     }
 
     /**
@@ -220,5 +253,15 @@ public class FileRead {
             e.printStackTrace();
         }
         return s;
+    }
+
+    public static byte[] intToBytes2(int n) {
+        byte[] b = new byte[4];
+
+        for (int i = 0; i < 4; i++) {
+            b[3 - i] = (byte) (n >> (24 - i * 8));
+
+        }
+        return b;
     }
 }
