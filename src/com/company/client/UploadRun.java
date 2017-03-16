@@ -26,12 +26,12 @@ public class UploadRun implements Runnable {
         try {
             socket = new Socket(Upload.propertie.getIP(), Upload.propertie.getPort());
             ow = new BufferedOutputStream(socket.getOutputStream());
-            ow.write(content);
-            ow.flush();
+            upload();
             System.out.println("启动线程 结束上传--------------------------");
         } catch (ConnectException exception) {
-            System.out.print("链接异常上传失败");
+            upload();
         } catch (IOException e) {
+            upload();
         } finally {
             try {
                 if(ow!=null){
@@ -43,6 +43,15 @@ public class UploadRun implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void upload() {
+        try {
+            ow.write(content);
+            ow.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -3,6 +3,10 @@ package com.company;
 import com.company.client.Guard;
 import com.company.client.Upload;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+
 public class Main {
     public static void main(String[] args) {
         Thread one = new Upload();

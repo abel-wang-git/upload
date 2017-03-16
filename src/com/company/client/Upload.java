@@ -13,7 +13,6 @@ import java.util.concurrent.Executors;
  */
 public class Upload extends Thread {
     public static Propertie propertie = new Propertie();
-
     @Override
     public void run() {
         {
@@ -35,23 +34,19 @@ public class Upload extends Thread {
             } catch (IOException e) {
                 System.out.println("配置文件读取出错");
             }
-
-            int count = 0;
             //线程池
-            ExecutorService pool = Executors.newFixedThreadPool(60);
+            ExecutorService pool = Executors.newFixedThreadPool(3);
             while (true) {
                 //扫描文件
                 File file = FileRead.scanDir(propertie.getBaseDir());
                 if (file != null) {
-                    File pic = new File(file.getPath().replace("_0.dat", "_1.jpg"));
-                    System.out.println(count + "------开始上传文件" + file.getName());
+                    System.out.println("------开始上传文件" + file.getName());
                     byte[] content = FileRead.readFile(file);
                     if(content!=null){
                         UploadRun upload = new UploadRun(file, content);
                         pool.execute(upload);
                     }
                 }
-                count++;
             }
         }
     }
