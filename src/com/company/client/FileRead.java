@@ -2,6 +2,7 @@ package com.company.client;
 
 import javax.imageio.stream.FileImageInputStream;
 import java.io.*;
+import java.util.*;
 
 /**
  * Created by wanghuiwen on 17-3-13.
@@ -14,7 +15,7 @@ public class FileRead {
     public static File scanDir(String baseDir) {
         File file = new File(baseDir);
         if (file.isDirectory()) {
-            File[] fileArr = file.listFiles();
+            File[] fileArr=orderByDate( file.listFiles());
             for (File f : fileArr) {
                 if (f.isDirectory()) {
                     scanDir(f.getPath());
@@ -31,7 +32,24 @@ public class FileRead {
         }
         return null;
     }
-
+    //时间排序
+    public static File[] orderByDate(File[] fs) {
+        Arrays.sort(fs,new Comparator< File>(){
+            public int compare(File f1, File f2) {
+                long diff = f1.lastModified() - f2.lastModified();
+                if (diff < 0)
+                    return 1;
+                else if (diff == 0)
+                    return 0;
+                else
+                    return -1;
+            }
+            public boolean equals(Object obj) {
+                return true;
+            }
+        });
+        return fs;
+    }
 
     public static byte[] readFile(File file) {
         byte[] result = null;
