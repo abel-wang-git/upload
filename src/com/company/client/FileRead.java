@@ -9,6 +9,7 @@ import java.util.Comparator;
 
 /**
  * Created by wanghuiwen on 17-3-13.
+ *
  */
 public class FileRead {
     private static Logger logger = Logger.getLogger(FileRead.class);
@@ -165,7 +166,7 @@ public class FileRead {
     //Õº∆¨¥¶¿Ì
     private static byte[] getBytes(byte[] data, File file, byte[] result, byte[] datas) {
         File pic;
-        pic = new File(Upload.propertie.getPicture()+"/"+file.getName().replace("_0.dat", "_1.jpg"));
+        pic = new File(file.getPath().replace("_0.dat", "_1.jpg").replace("new","old"));
         if (pic != null && pic.renameTo(pic)) {
             byte[] picByte = image2byte(pic);
             int length = picByte.length + datas.length;

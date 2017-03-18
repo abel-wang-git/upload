@@ -39,7 +39,7 @@ public class Upload extends Thread {
                 propertie.setMoveTo(p.getProperty("moveTo"));
                 propertie.setIP(p.getProperty("IP"));
                 propertie.setPort(Integer.parseInt(p.getProperty("port")));
-                propertie.setPicture(p.getProperty("PicDir"));
+//                propertie.setPicture(p.getProperty("PicDir"));
                 File file = new File(propertie.getMoveTo() + "/");
                 if (!file.exists() && !file.isDirectory()) {
                     file.mkdir();
