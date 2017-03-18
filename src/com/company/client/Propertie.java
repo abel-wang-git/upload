@@ -6,16 +6,17 @@ package com.company.client;
 public class Propertie {
     private String baseDir;
     private String suffix;
-    //å¡å£ç¼–å·
+    //¿¨¿Ú±àºÅ
     private String bayonetId;
-    //æ–¹å‘ç±»å‹
+    //·½ÏòÀàĞÍ
     private String orientation;
-    //è½¦é“å·
+    //³µµÀºÅ
     private String lane;
-    //ä¸Šä¼ å®Œæˆåç§»åŠ¨åˆ°è¿™ä¸ªè·¯å¾„ä¸‹
+    //ÉÏ´«Íê³ÉºóÒÆ¶¯µ½Õâ¸öÂ·¾¶ÏÂ
     private String moveTo;
     private int port;
     private  String IP;
+    private  String picture;
 
     public String getBaseDir() {
         return baseDir;
@@ -80,4 +81,12 @@ public class Propertie {
     public void setIP(String IP) {
         this.IP = IP;
     }
+
+    public String getPicture() {
+        return picture;
+    }
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
 }
+

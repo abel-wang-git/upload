@@ -13,7 +13,7 @@ import java.util.Comparator;
 public class FileRead {
     private static Logger logger = Logger.getLogger(FileRead.class);
     /**
-     * æ‰«æç›®å½•
+     * É¨ÃèÄ¿Â¼
      */
     public static File scanDir(String baseDir) {
         File file = new File(baseDir);
@@ -25,7 +25,7 @@ public class FileRead {
                 } else {
                     if (f.getName().endsWith(".dat")) {
                         if (!f.renameTo(f)) {
-                            logger.error("æ–‡ä»¶å ç”¨è·³è¿‡"+f.getName());
+                            logger.error(" file not "+f.getName());
                             continue;
                         }
                         return f;
@@ -36,7 +36,7 @@ public class FileRead {
         return null;
     }
 
-    //æ—¶é—´æ’åº
+    //Ê±¼äÅÅĞò
     private static File[] orderByDate(File[] fs) {
         Arrays.sort(fs, new Comparator<File>() {
             public int compare(File f1, File f2) {
@@ -48,7 +48,6 @@ public class FileRead {
                 else
                     return -1;
             }
-
             public boolean equals(Object obj) {
                 return true;
             }
@@ -71,28 +70,26 @@ public class FileRead {
             bos.close();
             fi.close();
             file.renameTo(new File(Upload.propertie.getMoveTo() + "/" + file.getName()));
-            logger.info("ç§»åŠ¨æ–‡ä»¶" + Upload.propertie.getMoveTo() + "/" + file.getName());
             file.delete();
-            logger.info("åˆ é™¤" + file.getName());
         } catch (FileNotFoundException e1) {
-            logger.error("æ–‡ä»¶æ‰“å¼€å‡ºé”™" +e1.getMessage());
+            logger.error("ÎÄ¼ş´ò¿ª³ö´í" +e1.getMessage());
         } catch (IOException e) {
-            logger.error(e.getMessage()+e.getStackTrace());
+            logger.error(e.getMessage());
         } finally {
             try {
                 fi.close();
             } catch (IOException e) {
-                logger.error(e.getMessage()+e.getStackTrace());
+                logger.error(e.getMessage());
             }
         }
         return result;
     }
 
     /**
-     * å¤„ç†æ•°æ®
+     * ´¦ÀíÊı¾İ
      */
     public static byte[] dataFormat(byte[] data, File file) {
-        //å›¾ç‰‡
+        //Í¼Æ¬
         File pic = null;
         byte[] result = null;
         try {
@@ -102,14 +99,14 @@ public class FileRead {
             for (int i = 0; i < kkbs.getBytes("GBK").length; i++) {
                 datas[i] = kkbs.getBytes("GBK")[i];
             }
-            //å¡å£ç¼–å·4-8
+            //¿¨¿Ú±àºÅ4-8
             byte[] id = Upload.propertie.getBayonetId().getBytes("GBK");
             for (int i = 0; i < id.length; i++) {
                 datas[8 + i] = id[i];
             }
-            //è½¦ç‰Œ 36å¼€å§‹
+            //³µÅÆ 36¿ªÊ¼
             String chePai;
-            if (data[60] != 78 && data[61] != 65) {
+            if (data[61] != 78 && data[61] != 65) {
                 chePai = byteToString(data, 60, 8);
             } else {
                 chePai = "-";
@@ -117,61 +114,59 @@ public class FileRead {
             for (int i = 0; i < chePai.getBytes("GBK").length; i++) {
                 datas[40 + i] = chePai.getBytes("GBK")[i];
             }
-            //è¿‡è½¦æ—¶é—´52å¼€å§‹
+            //¹ı³µÊ±¼ä52¿ªÊ¼
             String date = file.getName().split("_")[0];
             StringBuilder sb = dateFamart(date);
             for (int i = 0; i < sb.toString().getBytes("GBK").length; i++) {
-                datas[53 + i] = sb.toString().getBytes("GBK")[i];
+                datas[54 + i] = sb.toString().getBytes("GBK")[i];
             }
-            //æ–¹å‘
+            //·½Ïò
             int num = (byteToInt2(data, 224));
             datas[38] = (byte) num;
 
-            //è½¦é“å·
+            //³µµÀºÅ
             int num2 = (byteToInt2(data, 16));
             datas[39] = (byte) num2;
-
-            //å·ç‰Œç§ç±»
-            int type = (byteToInt2(data, 108));
-            String typeStr;
-            if (type < 10 && type > 0) {
-                typeStr = "0" + type;
-            } else if (type <= 0) {
+            //ºÅÅÆÖÖÀà
+            String typeStr="";
+            //ÏŞËÙ
+            int cloro=byteToInt2(data,112);
+            int xiansu=0;
+            if(cloro==1){
+                cloro=2;
                 typeStr = "01";
-            } else {
-                typeStr = Integer.toString(type);
+                 xiansu = (byteToInt2(data, 136));
+            }else
+            if(cloro==4){
+                cloro=1;
+                typeStr = "02";
+                xiansu = (byteToInt2(data, 140));
+            }else{
+                cloro=9;
+                typeStr="44";
             }
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i<typeStr.getBytes().length; i++) {
                 datas[50 + i] = typeStr.getBytes("GBK")[i];
             }
-
-            //é™é€Ÿ
-            int tpe = byteToInt2(data, 124);
-
-            int xiansu = (byteToInt2(data, 136));
-
-            int xiansu1 = (byteToInt2(data, 140));
-            datas[78] = (byte) xiansu;
-
-            //è½¦é€Ÿ
+            datas[52]=(byte)cloro;
+            datas[79] = (byte) xiansu;
+            //³µËÙ
             int speed = (byteToInt2(data, 20));
-            datas[77] = (byte) speed;
-
-            //å¤„ç†å›¾ç‰‡
+            datas[78] = (byte) speed;
+            //´¦ÀíÍ¼Æ¬
             result = getBytes(data, file, result, datas);
-
         } catch (UnsupportedEncodingException e) {
             logger.error(e.getMessage()+e.getStackTrace());
+        }catch (Exception e){
+            result=null;
         }
         return result;
     }
-
-    //å›¾ç‰‡å¤„ç†
+    //Í¼Æ¬´¦Àí
     private static byte[] getBytes(byte[] data, File file, byte[] result, byte[] datas) {
         File pic;
-        pic = new File(file.getPath().replace("_0.dat", "_1.jpg"));
+        pic = new File(Upload.propertie.getPicture()+"/"+file.getName().replace("_0.dat", "_1.jpg"));
         if (pic != null && pic.renameTo(pic)) {
-            System.out.println("å›¾ç‰‡å¤„ç†" + pic.getName());
             byte[] picByte = image2byte(pic);
             int length = picByte.length + datas.length;
             for (int i = 0; i < intToBytes2(length).length; i++) {
@@ -179,7 +174,7 @@ public class FileRead {
             }
             result = mergeArray(datas, picByte);
         } else {
-            logger.error("å›¾ç‰‡å‡ºé”™"+pic.getPath());
+            logger.error("Í¼Æ¬³ö´í"+pic.getPath());
             result = null;
         }
         return result;
@@ -198,7 +193,7 @@ public class FileRead {
     }
 
     /**
-     * å›¾ç‰‡è½¬byte
+     * Í¼Æ¬×ªbyte
      */
 
     private static byte[] image2byte(File file) {
@@ -216,19 +211,19 @@ public class FileRead {
             output.close();
             input.close();
         } catch (FileNotFoundException ex1) {
-            logger.error(ex1.getMessage()+ex1.getStackTrace());
+            logger.error(ex1.getMessage());
         } catch (IOException ex1) {
-            logger.error(ex1.getMessage()+ex1.getStackTrace());
+            logger.error(ex1.getMessage());
         }
         return data;
     }
 
     /***
-     * åˆå¹¶å­—èŠ‚æ•°ç»„
+     * ºÏ²¢×Ö½ÚÊı×é
      *
      */
     public static byte[] mergeArray(byte[]... a) {
-        // åˆå¹¶å®Œä¹‹åæ•°ç»„çš„æ€»é•¿åº¦
+        // ºÏ²¢ÍêÖ®ºóÊı×éµÄ×Ü³¤¶È
         int index = 0;
         int sum = 0;
         for (int i = 0; i < a.length; i++) {
@@ -240,14 +235,14 @@ public class FileRead {
             if (lengthOne == 0) {
                 continue;
             }
-            // æ‹·è´æ•°ç»„
+            // ¿½±´Êı×é
             System.arraycopy(a[i], 0, result, index, lengthOne);
             index = index + lengthOne;
         }
         return result;
     }
 
-    //byteè½¬æ¢ä¸ºint
+    //byte×ª»»Îªint
     public static int byteToInt2(byte[] b, int offset) {
         int value = 0;
         value = (int) ((b[offset] & 0xFF)
@@ -257,7 +252,7 @@ public class FileRead {
         return value;
     }
 
-    //byteè½¬æ¢ä¸ºint
+    //byte×ª»»Îªint
     public static String byteToString(byte[] b, int offset, int lenght) {
         byte[] tem = new byte[lenght];
         for (int i = 0; i < tem.length; i++) {
@@ -277,7 +272,6 @@ public class FileRead {
 
         for (int i = 0; i < 4; i++) {
             b[3 - i] = (byte) (n >> (24 - i * 8));
-
         }
         return b;
     }

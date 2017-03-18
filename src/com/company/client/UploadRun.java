@@ -15,27 +15,27 @@ public class UploadRun implements Runnable {
     private static Logger logger = Logger.getLogger(UploadRun.class);
     private Socket socket;
     private BufferedOutputStream ow;
-    private int files;
+    private int count;
     private byte[] content;
 
     public UploadRun(int files, byte[] content) {
-        this.files = files;
+        this.count = files;
         this.content = content;
     }
     @Override
     public void run() {
-        logger.info("启动线程"+files+" 开始上传--------------------------");
         try {
             socket = new Socket(Upload.propertie.getIP(), Upload.propertie.getPort());
             ow = new BufferedOutputStream(socket.getOutputStream());
             ow.write(content);
             ow.flush();
-            logger.info("启动线程"+files+"结束上传--------------------------");
+            Upload.count--;
+            logger.info("end upload "+Upload.count--+"end --------------------------");
         } catch (ConnectException exception) {
-            logger.error(exception.getMessage()+exception.getStackTrace()+content);
+            logger.error(exception.getMessage()+content);
             run();
         } catch (IOException e) {
-            logger.error( e.getMessage()+ e.getStackTrace()+content);
+            logger.error( e.getMessage()+Upload.count);
             run();
         } finally {
             try {
@@ -46,7 +46,7 @@ public class UploadRun implements Runnable {
                     socket.close();
                 }
             } catch (IOException e) {
-                logger.error(e.getMessage()+e.getStackTrace());
+                logger.error(e.getMessage());
             }
         }
     }

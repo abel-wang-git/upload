@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 public class Upload extends Thread {
     private static Logger logger = Logger.getLogger(Upload.class);
     public static Propertie propertie = new Propertie();
+    public static  int count=0;
     @Override
     public void run() {
         {
@@ -38,6 +39,7 @@ public class Upload extends Thread {
                 propertie.setMoveTo(p.getProperty("moveTo"));
                 propertie.setIP(p.getProperty("IP"));
                 propertie.setPort(Integer.parseInt(p.getProperty("port")));
+                propertie.setPicture(p.getProperty("PicDir"));
                 File file = new File(propertie.getMoveTo() + "/");
                 if (!file.exists() && !file.isDirectory()) {
                     file.mkdir();
@@ -47,23 +49,22 @@ public class Upload extends Thread {
             } catch (IOException e) {
                 logger.error("配置文件读取出错"+e.getMessage());
             }
-            int count=0;
             logger.error("配置文件读取成功 开始扫描文件");
             //线程池
             ExecutorService pool = Executors.newFixedThreadPool(3);
             while (true) {
+                if (count>10){
+                    continue;
+                }
                 //扫描文件
                 File file = FileRead.scanDir(propertie.getBaseDir());
                 if (file != null) {
-                    logger.error("------开始上传文件" + file.getName());
                     byte[] content = FileRead.readFile(file);
-                    if(content!=null){
+                    if(content!=null){count++;
                         UploadRun upload = new UploadRun(count, content);
                         pool.execute(upload);
-                        count++;
                     }
                 }
-
             }
         }
     }
