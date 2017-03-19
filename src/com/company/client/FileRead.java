@@ -18,11 +18,20 @@ public class FileRead {
      */
     public static File scanDir(String baseDir) {
         File file = new File(baseDir);
+        if (file == null) {
+            return null;
+        }
         if (file.isDirectory()) {
             File[] fileArr = orderByDate(file.listFiles());
+            if (fileArr.length == 0) {
+                return null;
+            }
             for (File f : fileArr) {
                 if (f.isDirectory()) {
-                    scanDir(f.getPath());
+                    File filetem = scanDir(f.getPath());
+                    if (filetem != null) {
+                        return filetem;
+                    }
                 } else {
                     if (f.getName().endsWith(".dat")) {
                         if (!f.renameTo(f)) {
@@ -70,11 +79,12 @@ public class FileRead {
             bos.flush();
             bos.close();
             fi.close();
-            file.renameTo(new File(Upload.propertie.getMoveTo() + "/" + file.getName()));
+            file.renameTo(new File(Upload.propertie.getMoveTo() + file.getName()));
             file.delete();
         } catch (FileNotFoundException e1) {
             logger.error("文件打开出错" +e1.getMessage());
         } catch (IOException e) {
+            e.printStackTrace();
             logger.error(e.getMessage());
         } finally {
             try {
@@ -149,7 +159,7 @@ public class FileRead {
             for (int i = 0; i<typeStr.getBytes().length; i++) {
                 datas[50 + i] = typeStr.getBytes("GBK")[i];
             }
-            datas[52]=(byte)cloro;
+            datas[53] = (byte) cloro;
             datas[79] = (byte) xiansu;
             //车速
             int speed = (byteToInt2(data, 20));
@@ -157,7 +167,7 @@ public class FileRead {
             //处理图片
             result = getBytes(data, file, result, datas);
         } catch (UnsupportedEncodingException e) {
-            logger.error(e.getMessage()+e.getStackTrace());
+            logger.error(e.getMessage());
         }catch (Exception e){
             result=null;
         }
