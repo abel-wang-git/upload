@@ -20,8 +20,12 @@ public class Upload extends Thread {
         {
             logger.error("开始读取配置文件");
             Properties p = new Properties();
-            InputStream fin = Upload.class.getClassLoader().
-                    getResourceAsStream("upload.properties");
+            InputStream fin = null;
+            try {
+                fin = new FileInputStream("upload");
+            } catch (FileNotFoundException e) {
+                logger.error("找不到配置文件");
+            }
             //初始化配置
             InputStreamReader br =null;
             try {
@@ -32,11 +36,14 @@ public class Upload extends Thread {
             try {
                 p.load(br);
                 propertie.setBaseDir(p.getProperty("baseDir"));
+                logger.error("baseDir="+propertie.getBaseDir());
                 propertie.setSuffix(p.getProperty("suffix"));
                 propertie.setBayonetId(p.getProperty("bayonetId"));
+                logger.error("bayonetId="+propertie.getBayonetId());
                 propertie.setOrientation(p.getProperty("orientation"));
                 propertie.setLane(p.getProperty("lane"));
                 propertie.setMoveTo(p.getProperty("moveTo"));
+                logger.error("moveTo="+propertie.getMoveTo());
                 propertie.setIP(p.getProperty("IP"));
                 propertie.setPort(Integer.parseInt(p.getProperty("port")));
 //                propertie.setPicture(p.getProperty("PicDir"));
@@ -60,10 +67,17 @@ public class Upload extends Thread {
                 File file = FileRead.scanDir(propertie.getBaseDir());
                 if (file != null) {
                     byte[] content = FileRead.readFile(file);
-                    if(content!=null){count++;
+                    if(content!=null){
+                        logger.info("开始上传文件"+ file.getName()+file.lastModified());
+                        count++;
                         UploadRun upload = new UploadRun(count, content);
                         pool.execute(upload);
                     }
+                }
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    run();
                 }
             }
         }
