@@ -3,6 +3,7 @@ package com.company.client;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
@@ -17,10 +18,12 @@ public class UploadRun implements Runnable {
     private BufferedOutputStream ow;
     private int count;
     private byte[] content;
+    private File file;
 
-    public UploadRun(int files, byte[] content) {
-        this.count = files;
+    public UploadRun(int count, byte[] content,File file) {
+        this.count = count;
         this.content = content;
+        this.file=file;
     }
     @Override
     public void run() {
@@ -31,13 +34,23 @@ public class UploadRun implements Runnable {
                 ow.write(content);
                 ow.flush();
                 Upload.count--;
-                logger.info("end upload"+count--);
+                logger.info("upload success file [[[[[["+file.getPath()+"]]]]]]"+count++);
             }
         } catch (ConnectException exception) {
             logger.error(exception.getMessage()+count);
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             run();
         } catch (IOException e) {
             logger.error( e.getMessage()+Upload.count);
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException xe) {
+                e.printStackTrace();
+            }
             run();
         } finally {
             try {

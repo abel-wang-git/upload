@@ -68,9 +68,9 @@ public class Upload extends Thread {
                 if (file != null) {
                     byte[] content = FileRead.readFile(file);
                     if(content!=null){
-                        logger.info("开始上传文件"+ file.getName()+file.lastModified());
+                        logger.info("start upload file[[[[[[["+ file.getPath()+"]]]]]]]");
                         count++;
-                        UploadRun upload = new UploadRun(count, content);
+                        UploadRun upload = new UploadRun(count, content,file);
                         pool.execute(upload);
                     }
                 }
