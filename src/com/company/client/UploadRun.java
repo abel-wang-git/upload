@@ -26,13 +26,15 @@ public class UploadRun implements Runnable {
     public void run() {
         try {
             socket = new Socket(Upload.propertie.getIP(), Upload.propertie.getPort());
-            ow = new BufferedOutputStream(socket.getOutputStream());
-            ow.write(content);
-            ow.flush();
-            Upload.count--;
-            logger.info("end upload "+Upload.count--+"end --------------------------");
+            if(socket!=null){
+                ow = new BufferedOutputStream(socket.getOutputStream());
+                ow.write(content);
+                ow.flush();
+                Upload.count--;
+                logger.info("end upload"+count--);
+            }
         } catch (ConnectException exception) {
-            logger.error(exception.getMessage()+content);
+            logger.error(exception.getMessage()+count);
             run();
         } catch (IOException e) {
             logger.error( e.getMessage()+Upload.count);
@@ -49,6 +51,7 @@ public class UploadRun implements Runnable {
                 logger.error(e.getMessage());
             }
         }
+
     }
 }
 
