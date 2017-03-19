@@ -11,7 +11,7 @@ import java.util.Comparator;
  * Created by wanghuiwen on 17-3-13.
  *
  */
-public class FileRead {
+class FileRead {
     private static Logger logger = Logger.getLogger(FileRead.class);
     /**
      * 扫描目录
@@ -65,7 +65,7 @@ public class FileRead {
         return fs;
     }
 
-    public static byte[] readFile(File file) {
+    static byte[] readFile(File file) {
         byte[] result = null;
         FileInputStream fi = null;
         try {
@@ -79,7 +79,9 @@ public class FileRead {
             bos.flush();
             bos.close();
             fi.close();
-            file.renameTo(new File(Upload.propertie.getMoveTo() + file.getName()));
+            File backup=new File(Upload.propertie.getMoveTo() + file.getParent());
+            if(!backup.exists()&&!backup.isDirectory()) backup.mkdirs();
+            file.renameTo(new File(backup+"/"+file.getName()));
             file.delete();
         } catch (FileNotFoundException e1) {
             logger.error("文件打开出错" +e1.getMessage());
@@ -88,7 +90,9 @@ public class FileRead {
             logger.error(e.getMessage());
         } finally {
             try {
-                fi.close();
+                if(fi!=null){
+                    fi.close();
+                }
             } catch (IOException e) {
                 logger.error(e.getMessage());
             }
@@ -99,7 +103,7 @@ public class FileRead {
     /**
      * 处理数据
      */
-    public static byte[] dataFormat(byte[] data, File file) {
+    private static byte[] dataFormat(byte[] data, File file) {
         //图片
         File pic = null;
         byte[] result = null;
@@ -112,9 +116,7 @@ public class FileRead {
             }
             //卡口编号4-8
             byte[] id = Upload.propertie.getBayonetId().getBytes("GBK");
-            for (int i = 0; i < id.length; i++) {
-                datas[8 + i] = id[i];
-            }
+            System.arraycopy(id, 0, datas, 8, id.length);
             //车牌 36开始
             String chePai;
             if (data[61] != 78 && data[61] != 65) {
@@ -139,7 +141,7 @@ public class FileRead {
             int num2 = (byteToInt2(data, 16));
             datas[39] = (byte) num2;
             //号牌种类
-            String typeStr="";
+            String typeStr;
             //限速
             int cloro=byteToInt2(data,112);
             int xiansu=0;
@@ -180,9 +182,7 @@ public class FileRead {
         if (pic != null && pic.renameTo(pic)) {
             byte[] picByte = image2byte(pic);
             int length = picByte.length + datas.length;
-            for (int i = 0; i < intToBytes2(length).length; i++) {
-                datas[4 + i] = intToBytes2(length)[i];
-            }
+            System.arraycopy(intToBytes2(length), 0, datas, 4, intToBytes2(length).length);
             result = mergeArray(datas, picByte);
         } else {
             logger.error("图片出错"+pic.getPath());
@@ -209,12 +209,12 @@ public class FileRead {
 
     private static byte[] image2byte(File file) {
         byte[] data = null;
-        FileImageInputStream input = null;
+        FileImageInputStream input ;
         try {
             input = new FileImageInputStream(file);
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             byte[] buf = new byte[(int) file.length()];
-            int numBytesRead = 0;
+            int numBytesRead ;
             while ((numBytesRead = input.read(buf)) != -1) {
                 output.write(buf, 0, numBytesRead);
             }
@@ -233,7 +233,7 @@ public class FileRead {
      * 合并字节数组
      *
      */
-    public static byte[] mergeArray(byte[]... a) {
+    private static byte[] mergeArray(byte[]... a) {
         // 合并完之后数组的总长度
         int index = 0;
         int sum = 0;
@@ -254,8 +254,8 @@ public class FileRead {
     }
 
     //byte转换为int
-    public static int byteToInt2(byte[] b, int offset) {
-        int value = 0;
+    private static int byteToInt2(byte[] b, int offset) {
+        int value;
         value = (int) ((b[offset] & 0xFF)
                 | ((b[offset + 1] & 0xFF) << 8)
                 | ((b[offset + 2] & 0xFF) << 16)
@@ -264,21 +264,19 @@ public class FileRead {
     }
 
     //byte转换为int
-    public static String byteToString(byte[] b, int offset, int lenght) {
+    private static String byteToString(byte[] b, int offset, int lenght) {
         byte[] tem = new byte[lenght];
-        for (int i = 0; i < tem.length; i++) {
-            tem[i] = b[offset + i];
-        }
+        System.arraycopy(b, offset + 0, tem, 0, tem.length);
         String s = null;
         try {
             s = new String(tem, "GBK");
         } catch (UnsupportedEncodingException e) {
-            logger.error(e.getMessage()+e.getStackTrace());
+            logger.error(e.getMessage());
         }
         return s;
     }
 
-    public static byte[] intToBytes2(int n) {
+    private static byte[] intToBytes2(int n) {
         byte[] b = new byte[4];
 
         for (int i = 0; i < 4; i++) {
