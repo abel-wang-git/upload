@@ -147,12 +147,12 @@ class FileRead {
             int xiansu=0;
             if(cloro==1){
                 cloro=2;
-                typeStr = "01";
+                typeStr = "02";
                  xiansu = (byteToInt2(data, 136));
             }else
             if(cloro==4){
                 cloro=1;
-                typeStr = "02";
+                typeStr = "01";
                 xiansu = (byteToInt2(data, 140));
             }else{
                 cloro=9;

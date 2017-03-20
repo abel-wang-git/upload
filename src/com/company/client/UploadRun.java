@@ -39,7 +39,7 @@ public class UploadRun implements Runnable {
         } catch (ConnectException exception) {
             logger.error(exception.getMessage()+count);
             try {
-                Thread.sleep(5);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -47,7 +47,7 @@ public class UploadRun implements Runnable {
         } catch (IOException e) {
             logger.error( e.getMessage()+Upload.count);
             try {
-                Thread.sleep(5);
+                Thread.sleep(50);
             } catch (InterruptedException xe) {
                 e.printStackTrace();
             }
